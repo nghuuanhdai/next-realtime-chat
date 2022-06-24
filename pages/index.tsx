@@ -6,6 +6,7 @@ import ChatMessage from '../components/message'
 import { IMessage, IMessageData, IUser } from '../types'
 import { FormEvent, FormEventHandler, MouseEventHandler, useEffect, useState } from 'react'
 import { NextPage } from 'next/types'
+import Link from 'next/link'
 
 const Home: NextPage = () => {
   const [chatData, setChatData] = useState<IMessageData|null>(null)
@@ -49,7 +50,7 @@ const Home: NextPage = () => {
     for (let i = 0; i < 10; i++) {
       const message: IMessage = {
         user: [me, other][Math.floor(Math.random()*2)],
-        message: lorem.generateParagraphs(1),
+        message: lorem.generateParagraphs(Math.floor(Math.random()*5)+1),
         _id: i.toString(),
         time: new Date()
       }
@@ -81,12 +82,6 @@ const Home: NextPage = () => {
     }
   }
 
-  function loginFormSubmit(evt:FormEvent<HTMLFormElement>) {
-    evt.preventDefault()
-    console.log('login')
-    const formData = new FormData(evt.target as HTMLFormElement)
-  }
-
   function searchFormSubmit(evt:FormEvent<HTMLFormElement>) {
     evt.preventDefault()
     console.log('search')
@@ -111,27 +106,18 @@ const Home: NextPage = () => {
             ?(
             <div className='flex flex-row p-2 items-start'>
               <h1 className='text-4xl font-bold flex-auto text-amber-400'><button onClick={()=> setSideBar(!sideBar)}>{user?.userName}</button></h1>
-              <button onClick={logout} type='button' className='flex-none mt-2 flex-auto rounded bg-slate-400 p-2 px-5 text-white font-semibold'>Logout</button>
+              <Link href='/api/logout'><button className='flex-none mt-2 flex-none rounded bg-slate-400 p-2 px-5 text-white font-semibold'>Logout</button></Link>
             </div>
           )
-          :(
-            <form onSubmit={loginFormSubmit} className='flex flex-col p-2 max-w-xs mx-auto'>
-              <h1 className='text-4xl font-bold flex-auto text-amber-400 mx-auto'>Realtime chat</h1>
-              <label htmlFor='username' className='flex-auto text-black/40 text-sm'>user name</label>
-              <input name='username' id='username' className='text-blue-900 flex-auto bg-slate-200 rounded-lg p-2' type='text'></input>
-              <label htmlFor='password' className='flex-auto text-black/40 text-sm'>password</label>
-              <input name='password' id='password' className='text-blue-900 flex-auto bg-slate-200 rounded-lg p-2' type='password'></input>
-              <button type='submit' className='mt-2 flex-auto rounded bg-blue-400 p-2 text-white font-semibold'>Login</button>
-            </form>
-          )
+          :(<></>)
         }
       </div>
       <div className='flex-auto min-h-0'>
         <div className='h-full flex flex-row relative'>
           <div className={
             sideBar
-            ?'absolute md:relative w-80 flex-col flex h-full z-10 bg-white overflow-clip transition-all'
-            :'absolute md:relative w-0 md:w-80 flex-col flex h-full z-10 bg-white overflow-clip transition-all'}>
+            ?'flex-none absolute md:relative w-80 flex-col flex h-full z-10 bg-white overflow-clip transition-all'
+            :'flex-none absolute md:relative w-0 md:w-80 flex-col flex h-full z-10 bg-white overflow-clip transition-all'}>
             <form onSubmit={searchFormSubmit} className='flex flex-row p-2 items-stretch'>
               <label htmlFor='username' className='flex-auto text-black/40 text-sm hidden'>user name</label>
               <input name='username' id='username' placeholder='user name' className='text-blue-900 flex-auto bg-slate-200 rounded-l-lg p-2' type='text'></input>
@@ -185,7 +171,7 @@ const Home: NextPage = () => {
             </div>
             <form id='message-form' onSubmit={onSubmit} className="flex mt-2">
               <textarea name='message' className='flex-auto border-2 h-20 rounded-l-lg p-2' onKeyDown={onKeyDown}/>
-              <button type='submit' className='w-20 h-20 rounded-r-lg bg-blue-400 p-2 text-white'>Send</button>
+              <button type='submit' className='w-20 h-20 rounded-r-lg bg-amber-400 p-2 text-white'>Send</button>
             </form>
           </div>
         </div>
