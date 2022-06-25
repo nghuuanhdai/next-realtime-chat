@@ -41,12 +41,12 @@ const Chat: React.FC<Props> = ({user, other})=>{
       fetchConversation()
     }
     window.addEventListener('focus', onFocus)
-    var visibilityChange;
-    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+    var visibilityChange: string = "visibilitychange";
+    if (document.hasOwnProperty('hidden')) { // Opera 12.10 and Firefox 18 and later support
       visibilityChange = "visibilitychange";
-    } else if (typeof document.msHidden !== "undefined") {
+    } else if (document.hasOwnProperty('msHidden')) {
       visibilityChange = "msvisibilitychange";
-    } else if (typeof document.webkitHidden !== "undefined") {
+    } else if (document.hasOwnProperty('webkitHidden')) {
       visibilityChange = "webkitvisibilitychange";
     }
     //^different browsers^
