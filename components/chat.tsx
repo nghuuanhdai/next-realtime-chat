@@ -41,7 +41,18 @@ const Chat: React.FC<Props> = ({user, other})=>{
       fetchConversation()
     }
     window.addEventListener('focus', onFocus)
-    return ()=>{ window.removeEventListener('focus', onFocus) }
+    var visibilityChange;
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+      visibilityChange = "visibilitychange";
+    } else if (typeof document.msHidden !== "undefined") {
+      visibilityChange = "msvisibilitychange";
+    } else if (typeof document.webkitHidden !== "undefined") {
+      visibilityChange = "webkitvisibilitychange";
+    }
+    //^different browsers^
+
+    document.addEventListener(visibilityChange, onFocus, false);
+    return ()=>{ window.removeEventListener(visibilityChange, onFocus) }
   }, [fetchConversation])
 
   function convertMessageJSON(message:{ _id: string; sender: { _id: string; username: string; }; sendTime: Date; message: string; }): IMessage{
