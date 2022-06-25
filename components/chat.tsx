@@ -128,7 +128,7 @@ const Chat: React.FC<Props> = ({user, other})=>{
         <ul className='flex flex-col pb-10'>
         {
           messages.map(message => (
-          <li key={message._id} className={message.fromUser._id===user?._id?"w-3/4 self-start":"w-3/4 self-end"}>
+          <li key={message._id} className={message.fromUser._id===user?._id?"w-3/4 self-end":"w-3/4 self-start"}>
             <ChatMessage message={message} myChat={message.fromUser._id===user?._id}></ChatMessage>
           </li>
           ))
@@ -138,7 +138,7 @@ const Chat: React.FC<Props> = ({user, other})=>{
       </div>
       <form id='message-form' onSubmit={onSubmit} className="flex mt-2">
         <textarea name='message' className='flex-auto border-2 h-20 rounded-l-lg p-2' onKeyDown={onKeyDown}/>
-        <button type='submit' className='w-20 h-20 rounded-r-lg bg-amber-400 p-2 text-white'>Send</button>
+        <button type='submit' className='w-20 h-20 rounded-r-lg bg-blue-400 p-2 text-white'>Send</button>
       </form>
     </div>
     </>
