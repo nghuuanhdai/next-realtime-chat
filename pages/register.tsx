@@ -5,7 +5,7 @@ import { NextPage } from "next/types";
 
 const Register: NextPage = ()=>{
   const router = useRouter()
-  const {err} = router.query
+  const {err, info} = router.query
 
   return (
     <div className="bg-gradient-to-t from-blue-400 to-indigo-300 h-screen flex items-center">
@@ -18,6 +18,10 @@ const Register: NextPage = ()=>{
       <main className="container mx-auto">
         { err
           ?(<p className="drop-shadow-xl bg-red-400 text-white m-5 p-3 rounded-lg mt-5 max-w-xs mx-auto">{err}</p>)
+          :(<></>)
+        }
+        { info
+          ?(<p className="drop-shadow-xl bg-green-400 text-white m-5 p-3 rounded-lg mt-5 max-w-xs mx-auto">{info}</p>)
           :(<></>)
         }
         <form action="/api/register" method="post" className='drop-shadow-xl rounded-xl p-5 bg-white flex flex-col p-2 max-w-xs mx-auto'>

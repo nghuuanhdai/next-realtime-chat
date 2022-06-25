@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 interface IUser{
   username: string;
@@ -13,5 +13,5 @@ const userSchema = new Schema<IUser>({
   password: {type: String, require: true},
 });
 
-const UserDBO = model<IUser>('User', userSchema)
+const UserDBO = mongoose.models.User || model<IUser>('User', userSchema)
 export default UserDBO

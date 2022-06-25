@@ -4,17 +4,39 @@ import {LoremIpsum} from 'lorem-ipsum'
 import ChatMessage from '../components/message'
 import { IMessage, IConversation, IConversationData, IUser } from '../types'
 import { FormEvent, useEffect, useState } from 'react'
-import { GetStaticProps, NextPage } from 'next/types'
+import { GetServerSidePropsContext, InferGetServerSidePropsType , NextPage } from 'next/types'
 import Link from 'next/link'
-import dbConnect from '../utils/dbConnect'
-export const getStaticProps: GetStaticProps = async(context)=>{
-  await dbConnect()
-  return {props: {}}
+import jwt from 'jsonwebtoken'
+import { IAccessTokenData } from './api/login'
+
+export const getServerSideProps = async(context: GetServerSidePropsContext)=>{
+  const accessToken = context.req.cookies['accessToken']
+  if(!accessToken)
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props:{user: null},
+    };
+  const decodedToken:(IAccessTokenData|undefined) = jwt.verify(accessToken, process.env.JWT_SECRET||'') as IAccessTokenData
+  if(!decodedToken)
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+      props:{user: null},
+    };
+  const user: IUser = {
+    _id: decodedToken.userId,
+    username: decodedToken.username
+  }
+  return {props: {user: user}}
 }
 
-const Home: NextPage = () => {
+const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({user}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [conversation, setConversation] = useState<IConversationData|null>(null)
-  const [user, setUser] = useState<IUser|null>(null)
   const [other, setOther] = useState<IUser|null>(null)
   const [conversations, setConversations] = useState<IConversation[]>([])
   const [foundUsers, setFoundUsers] = useState<IUser[]>([])
@@ -32,7 +54,7 @@ const Home: NextPage = () => {
       }
     })
 
-    const me: IUser = {username: 'Johnathan', _id: "0"}
+    const me: IUser = user || {username: 'Johnathan', _id: "0"}
     const other: IUser = {username: 'David', _id: "1"}
     const others: IUser[] = []
     for (let i = 0; i < 100; i++) {
@@ -64,7 +86,6 @@ const Home: NextPage = () => {
       messages.push(message)
     }
     setConversation({messages: messages})
-    setUser(me)
     setOther(other)
     setConversations([other,...others].map<IConversation>((user, index) => ({_id: index.toString(), otherUser: user})))
     setFoundUsers(fRequest)

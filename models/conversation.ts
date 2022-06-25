@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
 interface IConversation{
   user1: Schema.Types.ObjectId,
@@ -12,5 +12,5 @@ const conversationSchema = new Schema<IConversation>({
   messages: [{type: Schema.Types.ObjectId, ref: 'Message'}]
 })
 
-const ConversationDBO = model<IConversation>('Conversation', conversationSchema)
+const ConversationDBO = mongoose.models.Conversation || model<IConversation>('Conversation', conversationSchema)
 export default ConversationDBO

@@ -1,15 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from '../../utils/dbConnect'
-
-type Data = {
-  name: string
-}
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse
 ) {
-  await dbConnect()
-  //TODO handle cookie section clear
+  res.setHeader('Clear-Site-Data', "\"cookies\"");
   res.redirect(307,'/login')
 }

@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 interface IMessage{
   senderId: Schema.Types.ObjectId;
@@ -14,5 +14,5 @@ const messageSchema = new Schema<IMessage>({
   conversationId: {type: Schema.Types.ObjectId, ref: 'Conversation'}
 });
 
-const MessageDBO = model<IMessage>('Message', messageSchema)
+const MessageDBO = mongoose.models.Message || model<IMessage>('Message', messageSchema)
 export default MessageDBO
