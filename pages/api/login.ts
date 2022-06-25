@@ -38,6 +38,6 @@ export default async function handler(
     return res.status(500).send("INTERNAL ERROR!")
 
   const accessToken         = jwt.sign(accessTokenData, process.env.JWT_SECRET, {expiresIn: '1d', algorithm: 'HS256'})
-  res.setHeader('Set-Cookie', serialize('accessToken', accessToken, { path: '/' }));
+  res.setHeader('Set-Cookie', serialize('accessToken', accessToken, { path: '/', httpOnly: true, secure: process.env.NODE_ENV=='development'?false:true}));
   res.redirect(307, '/')
 }

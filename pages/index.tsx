@@ -3,11 +3,12 @@ import styles from '../styles/Home.module.css'
 import {LoremIpsum} from 'lorem-ipsum'
 import ChatMessage from '../components/message'
 import { IMessage, IConversation, IConversationData, IUser } from '../types'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { GetServerSidePropsContext, InferGetServerSidePropsType , NextPage } from 'next/types'
 import Link from 'next/link'
 import jwt from 'jsonwebtoken'
 import { IAccessTokenData } from './api/login'
+import { io, Socket } from "socket.io-client";
 
 export const getServerSideProps = async(context: GetServerSidePropsContext)=>{
   const accessToken = context.req.cookies['accessToken']
@@ -41,6 +42,7 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
   const [conversations, setConversations] = useState<IConversation[]>([])
   const [foundUsers, setFoundUsers] = useState<IUser[]>([])
   const [sideBar, setSideBar] = useState<boolean>(false)
+  const [socketRequestCompleted, setSocketRequestCompleted] = useState(false)
 
   useEffect(()=>{
     const lorem = new LoremIpsum({
@@ -89,24 +91,56 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
     setOther(other)
     setConversations([other,...others].map<IConversation>((user, index) => ({_id: index.toString(), otherUser: user})))
     setFoundUsers(fRequest)
-  }, [])
+  }, [user])
 
-  function sendMessage(form:HTMLFormElement) {
+  useEffect(()=>{
+    fetch('/api/socket').then(()=>setSocketRequestCompleted(true))
+  }, [])
+  
+  useEffect(()=>{
+    if(!socketRequestCompleted)
+      return;
+
+    const socket = io()
+
+    socket.on('connect', () => {
+      console.log('connected')
+    })
+    socket.on('message', (payload)=>{
+      console.log(`message: ${payload}`)
+    })
+    socket.on('disconnect', ()=>{
+      console.log('disconnect')
+    })
+
+    return ()=>{socket.disconnect()}
+  }, [socketRequestCompleted])
+
+
+  async function sendMessage(form:HTMLFormElement) {
     const formData = new FormData(form)
+    
+    await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({message: formData.get('message')})
+    })
     form.reset()
-    console.log(formData.get('message'))
+
   }
 
-  function onSubmit(evt:FormEvent<HTMLFormElement>) {
+  async function onSubmit(evt:FormEvent<HTMLFormElement>) {
     evt.preventDefault()
-    sendMessage(evt.target as HTMLFormElement)
+    await sendMessage(evt.target as HTMLFormElement)
   }
   
-  function onKeyDown(evt:React.KeyboardEvent<HTMLTextAreaElement>) {
+  async function onKeyDown(evt:React.KeyboardEvent<HTMLTextAreaElement>) {
     if (evt.key == 'Enter' && !evt.shiftKey) {
       const messageForm = document.getElementById('message-form') as HTMLFormElement;
 			evt.preventDefault();
-			sendMessage(messageForm)
+			await sendMessage(messageForm)
     }
   }
 
