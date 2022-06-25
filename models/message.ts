@@ -8,7 +8,7 @@ interface IMessage{
 }
 
 const messageSchema = new Schema<IMessage>({
-  sender: {type: Schema.Types.ObjectId, ref: 'User', autopopulate: true},
+  sender: {type: Schema.Types.ObjectId, ref: 'User'},
   sendTime: {type: Date, require: true},
   message: {type: String, require: true},
   conversationId: {type: Schema.Types.ObjectId, ref: 'Conversation'}

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState, useRef } from "react";
+import { FormEvent, useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { IMessage, IUser } from "../types";
 import ChatMessage from "./message";
 import { io, Socket } from "socket.io-client";
@@ -15,10 +15,8 @@ const Chat: React.FC<Props> = ({user, other})=>{
   const [conversationId, setConversationId] = useState<string|null>(null)
   const [socket, setSocket] = useState<Socket|null>(null)
 
-  useEffect(()=>{
-    //fetch conversation history
+  const fetchConversation = useCallback(()=>{
     if(!user || !other) return
-
     fetch('/api/get-conversation', {
       method: 'POST',
       headers: {
@@ -32,7 +30,19 @@ const Chat: React.FC<Props> = ({user, other})=>{
     .then(res => res.json())
     .then(data => setConversationId(data.conversationId))
     .catch(err => {console.error(err); setConversationId(null)})
-  }, [other, user])
+  }, [user, other])
+
+  useEffect(()=>{
+    fetchConversation()
+  }, [fetchConversation])
+
+  useEffect(()=>{
+    function onFocus() {
+      fetchConversation()
+    }
+    window.addEventListener('focus', onFocus)
+    return ()=>{ window.removeEventListener('focus', onFocus) }
+  }, [fetchConversation])
 
   function convertMessageJSON(message:{ _id: string; sender: { _id: string; username: string; }; sendTime: Date; message: string; }): IMessage{
     return {
