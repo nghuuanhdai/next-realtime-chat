@@ -8,34 +8,21 @@ type Props ={
 }
 
 const UserSearch : React.FC<Props> = ({other, changeConversationHandler})=>{
-  const [foundUsers, setFoundUsers] = useState<IUser[]>([])
-  useEffect(()=>{
-    //update search
-    const lorem = new LoremIpsum({
-      sentencesPerParagraph: {
-        max: 3,
-        min: 1
-      },
-      wordsPerSentence: {
-        max: 10,
-        min: 1
-      }
-    })
-    const founds: IUser[] = []
-    for (let i = 0; i < 5; i++) {
-      founds.push({
-        username: lorem.generateWords(1),
-        _id: (2+i).toString()
-      })
-    }
-    setFoundUsers(founds)
-
-  }, [other])
-  
-  function searchFormSubmit(evt:FormEvent<HTMLFormElement>) {
+  const [foundUsers, setFoundUsers] = useState<IUser[]>([])  
+  async function searchFormSubmit(evt:FormEvent<HTMLFormElement>) {
     evt.preventDefault()
     const formData = new FormData(evt.target as HTMLFormElement)
-    console.log(`search for ${formData.get('username')}`)
+    const res = await fetch('/api/finduser', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: formData.get('username')
+      })
+    })
+    const jsondata = await res.json()
+    setFoundUsers(jsondata.users)
   }
 
   function SelectUser(selectedUser: IUser) {

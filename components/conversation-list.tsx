@@ -13,28 +13,11 @@ const ConversationList: React.FC<Props> = ({user, other, changeConversationHandl
   useEffect(()=>{
     //fetch conversations
     if(!user) return
-
-    const lorem = new LoremIpsum({
-      sentencesPerParagraph: {
-        max: 3,
-        min: 1
-      },
-      wordsPerSentence: {
-        max: 10,
-        min: 1
-      }
+    fetch('/api/get-conversations', {
+      method: 'GET'
     })
-    const others: IUser[] = []
-    for (let i = 0; i < 100; i++) {
-      others.push({
-        username: lorem.generateWords(1),
-        _id: (2+i).toString()
-      })
-    }
-    if(other)
-      others.push(other)
-    
-    setConversations(others.map<IConversation>((user, index) => ({_id: index.toString(), otherUser: user})))
+    .then(res => res.json())
+    .then(data => setConversations(data.conversations))
   }, [user, other])
 
   function ChooseConversation(conversation:IConversation) {

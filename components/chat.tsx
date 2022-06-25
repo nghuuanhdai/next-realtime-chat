@@ -1,7 +1,7 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState, useRef } from "react";
 import { IMessage, IUser } from "../types";
 import ChatMessage from "./message";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import {LoremIpsum} from 'lorem-ipsum'
 
 type Props = {
@@ -12,39 +12,56 @@ type Props = {
 const Chat: React.FC<Props> = ({user, other})=>{
   const [messages, setMessages] = useState<IMessage[]>([])
   const [socketRequestCompleted, setSocketRequestCompleted] = useState(false)
+  const [conversationId, setConversationId] = useState<string|null>(null)
+  const [socket, setSocket] = useState<Socket|null>(null)
 
   useEffect(()=>{
     //fetch conversation history
-
     if(!user || !other) return
-    
-    const lorem = new LoremIpsum({
-      sentencesPerParagraph: {
-        max: 3,
-        min: 1
+
+    fetch('/api/get-conversation', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json'
       },
-      wordsPerSentence: {
-        max: 10,
-        min: 1
-      }
+      body: JSON.stringify({
+        u1Id: user._id,
+        u2Id: other._id
+      })
     })
-
-    const fetchMessages = []
-    for (let i = 0; i < 10; i++) {
-      const fromUser: IUser = [user, other][Math.floor(Math.random()*2)]
-      const toUser = fromUser === user ? other: user
-      const message: IMessage = {
-        fromUser: fromUser,
-        toUser: toUser,
-        message: lorem.generateParagraphs(Math.floor(Math.random()*5)+1),
-        _id: i.toString(),
-        time: new Date()
-      }
-      fetchMessages.push(message)
-    }
-
-    setMessages(fetchMessages)
+    .then(res => res.json())
+    .then(data => setConversationId(data.conversationId))
+    .catch(err => {console.error(err); setConversationId(null)})
   }, [other, user])
+
+  function convertMessageJSON(message:{ _id: string; sender: { _id: string; username: string; }; sendTime: Date; message: string; }): IMessage{
+    return {
+      _id: message._id,
+      fromUser: { _id: message.sender._id, username: message.sender.username },
+      toUser: { _id: message.sender._id, username: message.sender.username },
+      time: new Date(message.sendTime),
+      message: message.message
+    }
+  }
+
+  useMemo(()=>{
+    if(!conversationId) return
+    
+    fetch('/api/get-messages', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        conversationId: conversationId
+      })
+      })
+      .then(res => res.json())
+      .then(data => {
+        setMessages(data.messages.map((message: { _id: string; sender: { _id: string; username: string; }; sendTime: Date; message: string; }) => convertMessageJSON(message)))
+      })
+    }
+  , [conversationId])
 
   useEffect(()=>{
     fetch('/api/socket').then(()=>setSocketRequestCompleted(true))
@@ -55,32 +72,38 @@ const Chat: React.FC<Props> = ({user, other})=>{
       return;
 
     const socket = io()
+    setSocket(socket)
+    return ()=>{socket.disconnect()}
+  }, [socketRequestCompleted])
 
+  useMemo(()=>{
+    if(!socket) return
     socket.on('connect', () => {
       console.log('connected')
     })
     socket.on('message', (payload)=>{
-      console.log(`message: ${payload}`)
+      setMessages([...messages, convertMessageJSON(JSON.parse(payload))])
     })
     socket.on('disconnect', ()=>{
       console.log('disconnect')
     })
+  },[socket, messages])
 
-    return ()=>{socket.disconnect()}
-  }, [socketRequestCompleted])
+  useEffect(()=>{    
+    chatBottomRef?.current?.scrollIntoView({behavior: 'auto', });
+  }, [messages])
 
   async function sendMessage(form:HTMLFormElement) {
     const formData = new FormData(form)
     
-    await fetch('/api/chat', {
+    await fetch('/api/post-message', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({message: formData.get('message')})
+      body: JSON.stringify({message: formData.get('message'), conversationId: conversationId})
     })
     form.reset()
-
   }
 
   async function onSubmit(evt:FormEvent<HTMLFormElement>) {
@@ -96,11 +119,13 @@ const Chat: React.FC<Props> = ({user, other})=>{
     }
   }
   
+  const chatBottomRef = useRef<null | HTMLLIElement>(null);
+
   return (
     <>
     <div className='flex-auto'>
       <div className='h-[calc(100%-6rem)] overflow-auto'>
-        <ul className='flex flex-col-reverse pb-10'>
+        <ul className='flex flex-col pb-10'>
         {
           messages.map(message => (
           <li key={message._id} className={message.fromUser._id===user?._id?"w-3/4 self-start":"w-3/4 self-end"}>
@@ -108,6 +133,7 @@ const Chat: React.FC<Props> = ({user, other})=>{
           </li>
           ))
         }
+        <li ref={chatBottomRef}></li>
         </ul>
       </div>
       <form id='message-form' onSubmit={onSubmit} className="flex mt-2">
