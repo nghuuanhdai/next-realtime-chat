@@ -5,5 +5,5 @@ export default async function handler(
   res: NextApiResponse
 ) {
   res.setHeader('Clear-Site-Data', "\"cookies\"");
-  res.redirect(307,'/login')
+  res.redirect(303,'/login')
 }

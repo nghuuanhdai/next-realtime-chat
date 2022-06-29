@@ -16,7 +16,7 @@ export default async function handler(
 
   const matchUser = await UserDBO.findOne({$or: [{username: username}, {email: email}]})
   if(matchUser)
-    return res.redirect(307, `/register?err=${encodeURIComponent('username or email already exist! Choose a different username or email')}`);
+    return res.redirect(303, `/register?err=${encodeURIComponent('username or email already exist! Choose a different username or email')}`);
   const salt      : string = await bcrypt.genSalt()
   const hashedPass: string = await bcrypt.hash(password, salt);
 
@@ -26,5 +26,5 @@ export default async function handler(
     password: hashedPass
   })
   await newUser.save()
-  return res.redirect(307, `/login?info=${encodeURIComponent('user has been created')}`)
+  return res.redirect(303, `/login?info=${encodeURIComponent('user has been created')}`)
 }

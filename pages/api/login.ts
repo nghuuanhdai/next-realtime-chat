@@ -23,11 +23,11 @@ export default async function handler(
 
   const user = await UserDBO.findOne({username: username})
   if(!user)
-    return res.redirect(307, `/login?err=${encodeURIComponent('incorrect login credential')}`)
+    return res.redirect(303, `/login?err=${encodeURIComponent('incorrect login credential')}`)
   
   const validPassword = await bcrypt.compare(password, user.password)
   if(!validPassword)
-    return res.redirect(307, `/login?err=${encodeURIComponent('incorrect login credential')}`)
+    return res.redirect(303, `/login?err=${encodeURIComponent('incorrect login credential')}`)
 
   const accessTokenData: IAccessTokenData= {
     userId: user._id.toString(),
@@ -39,5 +39,5 @@ export default async function handler(
 
   const accessToken         = jwt.sign(accessTokenData, process.env.JWT_SECRET, {expiresIn: '1d', algorithm: 'HS256'})
   res.setHeader('Set-Cookie', serialize('accessToken', accessToken, { path: '/', httpOnly: true, secure: process.env.NODE_ENV=='development'?false:true}));
-  res.redirect(307, '/')
+  res.redirect(303, '/')
 }
