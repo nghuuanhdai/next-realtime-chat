@@ -1,34 +1,45 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<h1 align="center">
+    Nextjs Chat
+</h1>
+<p align="center">
+  <img width="200" src="https://user-images.githubusercontent.com/24937352/175799542-67ca2c15-1112-43a6-98a4-0df9db0198c1.png" alt="Online tutor logo">
 
-## Getting Started
+  <br/>
+  <h4 align="center">A Chat app made with nextjs, socket.io, typescript, jwt, mongoose, tailwind css.</h4>
+</p>
 
-First, run the development server:
+## Demo
+### Live demo: [Nextjs Chat Heroku](https://nnhhaadd-realtime-chat.herokuapp.com/)
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+### Deploy it yourself
+  - **Clone this repo:** `git clone git@github.com:nghuuanhdai/next-realtime-chat.git`
+  - **Setup environment variable:** This application uses MongoAtlas and JWT. To deploy the application yourself, make sure to populate all the environment variables in the following table.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+| Key | Value |
+|---|---|
+| MONGODB_URI | MongoDB connection URI |
+| JWT_SECRET  | Json web token secret |
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+  - **Start the server with**  `npm run start` 
+       
+## Features
+### Account authentication/authorization
+This application uses JWT for authentication.  
+**Password reset hasn't been implemented yet**
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+### User search
+Use the search form to search for a user with their username.  
+![image](https://user-images.githubusercontent.com/24937352/175799796-ecfc0fd0-d514-48c1-8d98-18747826c756.png)
+### User conversations
+Past conversation is available under Conversations section. Click on an username to see the conversation and continue it.  
+![image](https://user-images.githubusercontent.com/24937352/175799800-560e0716-a744-438a-b947-645096f0f387.png)
+### Chat history
+Upon open a conversation past messages will be fetched, allow user to see what they have said before.
+### Realtime chat with socket.io
+Realtime connection with socket.io, new message will be available immediately on other receipant if they are online
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### Responsive design with TailwindCss
+| Desktop | Tablet | Mobile |
+|---|---|---|
+|![image](https://user-images.githubusercontent.com/24937352/175799663-b1f2c2a6-4a24-41ab-a0e9-50f705b37ef3.png)|![image](https://user-images.githubusercontent.com/24937352/175799677-4c0410c9-37db-4079-ba19-9f7338b01ff6.png)|![image](https://user-images.githubusercontent.com/24937352/175799688-e0f345db-69cd-476e-a027-a1a69fd2bbec.png)|
