@@ -1,5 +1,4 @@
-import { LoremIpsum } from "lorem-ipsum";
-import { useEffect, useState } from "react";
+import { useRef } from "react";
 import useSWR from "swr";
 import { IUser } from "../types";
 
@@ -9,6 +8,7 @@ type Props = {
   changeConversationHandler: (userId: string)=>void
 }
 
+let fetchingPromise:Promise<IUser[]>|null = null
 const ConversationList: React.FC<Props> = ({user, other, changeConversationHandler}) =>{
   const userUrl = '/api/user' 
   async function fetcher()
@@ -17,7 +17,16 @@ const ConversationList: React.FC<Props> = ({user, other, changeConversationHandl
     const data = await res.json()
     return data.conversations
   }
-  const { data:conversations, error: fetchConversationErr } = useSWR<IUser[]>(userUrl, fetcher, {fallback: []})
+
+  async function singleFetcher()
+  {
+    if (!fetchingPromise)
+      fetchingPromise = fetcher()
+    const data = await fetchingPromise
+    fetchingPromise = null
+    return data
+  }
+  const { data:conversations, error: fetchConversationErr } = useSWR<IUser[]>(userUrl, singleFetcher, {fallback: []})
 
   function ChooseConversation(user:IUser) {
     return function HandleChoseConversation(evt: React.MouseEvent<HTMLButtonElement>)
