@@ -8,7 +8,7 @@ const Login: NextPage = ()=>{
   const {err, info} = router.query
 
   return (
-    <div className="bg-gradient-to-t from-blue-400 to-indigo-300 h-screen flex items-center">
+    <div className="bg-gradient-to-t from-blue-400 to-indigo-300 h-full flex items-center">
       <Head>
         <title>Next realtime chat</title>
         <meta name="description" content="realtime chat app with Nextjs" />

@@ -52,13 +52,13 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
   }
 
   return (
-    <div className={styles.container}>
-      <Head>
+    <>
+    <Head>
         <title>Next realtime chat</title>
         <meta name="description" content="realtime chat app with Nextjs" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="container mx-auto flex flex-col h-screen">
+      <main className="container mx-auto flex flex-col h-full">
       <div className='flex-none'>
         <Header user={user} onTitleClick={onTitleClick}></Header>
       </div>
@@ -76,7 +76,7 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
         </div>
       </div>
       </main>
-    </div>
+    </>
   )
 }
 
