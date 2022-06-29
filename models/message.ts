@@ -4,14 +4,16 @@ interface IMessage{
   sender: Schema.Types.ObjectId;
   sendTime: Date;
   message: string;
-  conversationId: Schema.Types.ObjectId;
+  user1: Schema.Types.ObjectId;
+  user2: Schema.Types.ObjectId;
 }
 
 const messageSchema = new Schema<IMessage>({
   sender: {type: Schema.Types.ObjectId, ref: 'User'},
   sendTime: {type: Date, require: true},
   message: {type: String, require: true},
-  conversationId: {type: Schema.Types.ObjectId, ref: 'Conversation'}
+  user1: {type: Schema.Types.ObjectId, ref: 'User', required: true},
+  user2: {type: Schema.Types.ObjectId, ref: 'User', required: true},
 });
 
 const MessageDBO = mongoose.models.Message || model<IMessage>('Message', messageSchema)

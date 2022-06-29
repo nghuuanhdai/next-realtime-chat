@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useMemo, useState, useRef, useCallback } from "re
 import { IMessage, IUser } from "../types";
 import ChatMessage from "./message";
 import { io, Socket } from "socket.io-client";
-import {LoremIpsum} from 'lorem-ipsum'
+import useSWR, { mutate } from 'swr'
 
 type Props = {
   user: IUser|null,
@@ -10,79 +10,19 @@ type Props = {
 }
 
 const Chat: React.FC<Props> = ({user, other})=>{
-  const [messages, setMessages] = useState<IMessage[]>([])
   const [socketRequestCompleted, setSocketRequestCompleted] = useState(false)
-  const [conversationId, setConversationId] = useState<string|null>(null)
   const [socket, setSocket] = useState<Socket|null>(null)
+  
+  const messageUrl = `/api/message/${other?._id}`
 
-  const fetchConversation = useCallback(()=>{
-    if(!user || !other) return
-    fetch('/api/get-conversation', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        u1Id: user._id,
-        u2Id: other._id
-      })
-    })
-    .then(res => res.json())
-    .then(data => setConversationId(data.conversationId))
-    .catch(err => {console.error(err); setConversationId(null)})
-  }, [user, other])
-
-  useEffect(()=>{
-    fetchConversation()
-  }, [fetchConversation])
-
-  useEffect(()=>{
-    function onFocus() {
-      fetchConversation()
-    }
-    window.addEventListener('focus', onFocus)
-    var visibilityChange: string = "visibilitychange";
-    if (document.hasOwnProperty('hidden')) { // Opera 12.10 and Firefox 18 and later support
-      visibilityChange = "visibilitychange";
-    } else if (document.hasOwnProperty('msHidden')) {
-      visibilityChange = "msvisibilitychange";
-    } else if (document.hasOwnProperty('webkitHidden')) {
-      visibilityChange = "webkitvisibilitychange";
-    }
-    //^different browsers^
-
-    document.addEventListener(visibilityChange, onFocus, false);
-    return ()=>{ window.removeEventListener(visibilityChange, onFocus) }
-  }, [fetchConversation])
-
-  function convertMessageJSON(message:{ _id: string; sender: { _id: string; username: string; }; sendTime: Date; message: string; }): IMessage{
-    return {
-      _id: message._id,
-      fromUser: { _id: message.sender._id, username: message.sender.username },
-      toUser: { _id: message.sender._id, username: message.sender.username },
-      time: new Date(message.sendTime),
-      message: message.message
-    }
+  async function fetcher() {
+    if(!user || !other) return []
+    const res = await fetch(messageUrl, {method: 'GET'})
+    const data = await res.json()
+    return data.messages
   }
 
-  useMemo(()=>{
-    if(!conversationId) return
-    
-    fetch('/api/get-messages', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        conversationId: conversationId
-      })
-      })
-      .then(res => res.json())
-      .then(data => {
-        setMessages(data.messages.map((message: { _id: string; sender: { _id: string; username: string; }; sendTime: Date; message: string; }) => convertMessageJSON(message)))
-      })
-    }
-  , [conversationId])
+  const {data: messages, error: messagesFetchErr} = useSWR<IMessage[]>(messageUrl, fetcher, {fallbackData: []})
 
   useEffect(()=>{
     fetch('/api/socket').then(()=>setSocketRequestCompleted(true))
@@ -103,12 +43,15 @@ const Chat: React.FC<Props> = ({user, other})=>{
       console.log('connected')
     })
     socket.on('message', (payload)=>{
-      setMessages([...messages, convertMessageJSON(JSON.parse(payload))])
+      const payloadData = JSON.parse(payload)
+      if ([other?._id, user?._id].includes(payloadData.senderId))
+        mutate(messageUrl, [...(messages??[]), payloadData.message], {populateCache: true, optimisticData: true, revalidate: false})
+      mutate('/api/user')
     })
     socket.on('disconnect', ()=>{
       console.log('disconnect')
     })
-  },[socket, messages])
+  },[socket, messages, messageUrl, other, user])
 
   useEffect(()=>{    
     chatBottomRef?.current?.scrollIntoView({behavior: 'auto', });
@@ -116,13 +59,12 @@ const Chat: React.FC<Props> = ({user, other})=>{
 
   async function sendMessage(form:HTMLFormElement) {
     const formData = new FormData(form)
-    
-    await fetch('/api/post-message', {
+    await fetch(messageUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({message: formData.get('message'), conversationId: conversationId})
+      body: JSON.stringify({message: formData.get('message')})
     })
     form.reset()
   }
@@ -148,9 +90,9 @@ const Chat: React.FC<Props> = ({user, other})=>{
       <div className='h-[calc(100%-6rem)] overflow-auto'>
         <ul className='flex flex-col pb-10'>
         {
-          messages.map(message => (
-          <li key={message._id} className={message.fromUser._id===user?._id?"w-3/4 self-end":"w-3/4 self-start"}>
-            <ChatMessage message={message} myChat={message.fromUser._id===user?._id}></ChatMessage>
+          messages?.map(message => (
+          <li key={message._id} className={message.sender._id===user?._id?"w-3/4 self-end":"w-3/4 self-start"}>
+            <ChatMessage message={message} myChat={message.sender._id===user?._id}></ChatMessage>
           </li>
           ))
         }

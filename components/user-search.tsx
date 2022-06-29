@@ -12,15 +12,7 @@ const UserSearch : React.FC<Props> = ({other, changeConversationHandler})=>{
   async function searchFormSubmit(evt:FormEvent<HTMLFormElement>) {
     evt.preventDefault()
     const formData = new FormData(evt.target as HTMLFormElement)
-    const res = await fetch('/api/finduser', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: formData.get('username')
-      })
-    })
+    const res = await fetch('/api/user/search?' +  new URLSearchParams([['username', formData.get('username') as string]]), {method: 'GET'})
     const jsondata = await res.json()
     setFoundUsers(jsondata.users)
   }

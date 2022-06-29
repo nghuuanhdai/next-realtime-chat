@@ -1,6 +1,7 @@
 import { LoremIpsum } from "lorem-ipsum";
 import { useEffect, useState } from "react";
-import { IConversation, IUser } from "../types";
+import useSWR from "swr";
+import { IUser } from "../types";
 
 type Props = {
   user: IUser|null,
@@ -9,21 +10,19 @@ type Props = {
 }
 
 const ConversationList: React.FC<Props> = ({user, other, changeConversationHandler}) =>{
-  const [conversations, setConversations] = useState<IConversation[]>([])
-  useEffect(()=>{
-    //fetch conversations
-    if(!user) return
-    fetch('/api/get-conversations', {
-      method: 'GET'
-    })
-    .then(res => res.json())
-    .then(data => setConversations(data.conversations))
-  }, [user, other])
+  const userUrl = '/api/user' 
+  async function fetcher()
+  {
+    const res = await fetch(userUrl, {method: 'GET'})
+    const data = await res.json()
+    return data.conversations
+  }
+  const { data:conversations, error: fetchConversationErr } = useSWR<IUser[]>(userUrl, fetcher, {fallback: []})
 
-  function ChooseConversation(conversation:IConversation) {
+  function ChooseConversation(user:IUser) {
     return function HandleChoseConversation(evt: React.MouseEvent<HTMLButtonElement>)
     {
-      changeConversationHandler(conversation.otherUser._id)
+      changeConversationHandler(user._id)
     }
   }
   return (
@@ -33,9 +32,9 @@ const ConversationList: React.FC<Props> = ({user, other, changeConversationHandl
       <div className='overflow-auto px-2 flex-auto min-h-0'>
         <ul className='pb-2 mt-1'>
           {
-            conversations?.map(conversation => (
-              <li key={conversation._id}>
-                <button onClick={ChooseConversation(conversation)} className={conversation.otherUser._id!==other?._id?'text-left w-full p-2 font-semibold text-black/70 text-xl hover:text-sky-500':'text-left w-full rounded-lg p-2 font-semibold bg-amber-400 text-white text-xl'}>{conversation.otherUser.username}</button>
+            conversations?.map(user => (
+              <li key={user._id}>
+                <button onClick={ChooseConversation(user)} className={user._id!==other?._id?'text-left w-full p-2 font-semibold text-black/70 text-xl hover:text-sky-500':'text-left w-full rounded-lg p-2 font-semibold bg-amber-400 text-white text-xl'}>{user.username}</button>
               </li>
             ))
           }
