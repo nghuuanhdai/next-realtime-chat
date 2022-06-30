@@ -66,8 +66,8 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
         <div className='h-full flex flex-row relative'>
           <div className={
             sideBar
-            ?'flex-none absolute md:relative w-80 flex-col flex h-full z-10 bg-white overflow-clip transition-all'
-            :'flex-none absolute md:relative w-0 md:w-80 flex-col flex h-full z-10 bg-white overflow-clip transition-all'}>
+            ?'flex-none absolute md:relative w-80 flex-col flex h-full z-10 bg-white overflow-hidden transition-all'
+            :'flex-none absolute md:relative w-0 md:w-80 flex-col flex h-full z-10 bg-white overflow-hidden transition-all'}>
             <UserSearch other={other} changeConversationHandler={ChangeConversation}></UserSearch>
             <ConversationList user={user} other={other} changeConversationHandler={ChangeConversation}></ConversationList>
           </div>

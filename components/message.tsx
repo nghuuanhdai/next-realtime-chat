@@ -12,7 +12,7 @@ const ChatMessage: React.FC<Props> = ({message, myChat})=>{
         <p style={{whiteSpace: "pre-line"}}>{message.message}</p>
         <p className="text-right text-white/80 text-xs mt-5">Send by <span className="font-bold">{message.sender.username}</span></p>
       </div>
-      <p className={myChat?"text-right text-xs text-black/50 mx-2":"text-xs text-black/50 mx-2"}>{new Date(message.sendTime).toUTCString()}</p>
+      <p className={myChat?"text-right text-xs text-black/50 mx-2":"text-xs text-black/50 mx-2"}>{new Date(message.sendTime).toLocaleString()}</p>
     </div>
   )
 }
