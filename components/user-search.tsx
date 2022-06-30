@@ -24,6 +24,7 @@ const UserSearch : React.FC<Props> = ({other, changeConversationHandler})=>{
   }
   return (
     <>
+    <h2 className='font-bold text-3xl text-amber-400'>Search User</h2>
     <form onSubmit={searchFormSubmit} className='flex flex-row p-2 items-stretch'>
       <label htmlFor='username' className='flex-auto text-black/40 text-sm hidden'>user name</label>
       <input name='username' id='username' placeholder='user name' className='text-blue-900 flex-auto bg-slate-200 rounded-l-lg p-2' type='text'></input>
