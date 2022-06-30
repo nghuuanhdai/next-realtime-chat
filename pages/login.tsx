@@ -31,7 +31,7 @@ const Login: NextPage = ()=>{
           <input name='username' id='username' className='text-blue-900 flex-auto bg-slate-200 rounded-lg p-2' type='text'></input>
           <label htmlFor='password' className='flex-auto text-black/40 text-sm'>password</label>
           <input name='password' id='password' className='text-blue-900 flex-auto bg-slate-200 rounded-lg p-2' type='password'></input>
-          <span  className="text-right text-sm text-blue-400 underline"><Link href="/reset-password">Forgot password</Link></span>
+          {/* <span  className="text-right text-sm text-blue-400 underline"><Link href="/reset-password">Forgot password</Link></span> */}
           <button type='submit' className='mt-6 flex-auto rounded bg-blue-400 p-2 text-white font-semibold'>Login</button>
           <p className="text-right text-sm text-blue-400">Don&apos;t have an account? <span className="underline"><Link href="/register">Create one?</Link></span></p>
         </form>
